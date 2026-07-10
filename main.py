@@ -1,8 +1,23 @@
 import os
+import argparse
 from dotenv import load_dotenv
 from openai import OpenAI
-from vals import *
 
+
+parser = argparse.ArgumentParser(
+    prog="Chatbot",
+    description="Uses your prompt and gives you an answer",
+)
+parser.add_argument("user_prompt", type=str, help="user_prompt => Type something to ask Chatbot.")
+args = parser.parse_args()
+
+model_id = "openrouter/free"
+message=[
+    {
+        "role": "user",
+        "content": {args.user_prompt},
+    }
+]
 
 def main():
     load_dotenv()
