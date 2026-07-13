@@ -8,16 +8,14 @@ parser = argparse.ArgumentParser(
     prog="Chatbot",
     description="Uses your prompt and gives you an answer",
 )
-parser.add_argument("user_prompt", type=str, help="user_prompt => Type something to ask Chatbot.")
+parser.add_argument("user_prompt", type=str, help="user_prompt => Type something to command line for Chatbot.")
+parser.add_argument("--verbose", action="store_true", help="Enable verbose output from Chatbot")
 args = parser.parse_args()
 
 model_id = "openrouter/free"
-message=[
-    {
-        "role": "user",
-        "content": {args.user_prompt},
-    }
-]
+message = [
+    {"role": "user", "content": args.user_prompt,}
+] # User prompt after input(CL) is stored inside args.user_prompt, defined in the first parser.add_argument
 
 def main():
     load_dotenv()
@@ -36,8 +34,10 @@ def main():
 
     if response.usage == None:
         raise RuntimeError("failed API request")
-    print(f"Prompt tokens: {response.usage.prompt_tokens}")
-    print(f"Response tokens: {response.usage.completion_tokens}")
+    if args.verbose:
+        print(f"User prompt: {args.user_prompt}")
+        print(f"Prompt tokens: {response.usage.prompt_tokens}")
+        print(f"Response tokens: {response.usage.completion_tokens}")
 
     print(response.choices[0].message.content)
 
