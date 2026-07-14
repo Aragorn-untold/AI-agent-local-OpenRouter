@@ -1,7 +1,10 @@
 import os
 import argparse
+import json
 from dotenv import load_dotenv
 from openai import OpenAI
+from prompts import system_prompt
+from AI_agent.call_function import available_functions
 
 
 parser = argparse.ArgumentParser(
@@ -13,7 +16,8 @@ parser.add_argument("--verbose", action="store_true", help="Enable verbose outpu
 args = parser.parse_args()
 
 model_id = "openrouter/free"
-message = [
+messages = [
+    {"role": "system", "content": system_prompt,},
     {"role": "user", "content": args.user_prompt,}
 ] # User prompt after input(CL) is stored inside args.user_prompt, defined in the first parser.add_argument
 
@@ -29,7 +33,8 @@ def main():
     )
     response = client.chat.completions.create(
         model=model_id, # https://developers.openai.com/api/reference/python/resources/chat/subresources/completions/methods/create
-        messages=message
+        messages=messages,
+        tools=available_functions,
     )
 
     if response.usage == None:
@@ -38,8 +43,14 @@ def main():
         print(f"User prompt: {args.user_prompt}")
         print(f"Prompt tokens: {response.usage.prompt_tokens}")
         print(f"Response tokens: {response.usage.completion_tokens}")
-
-    print(response.choices[0].message.content)
+    
+    r_message = response.choices[0].message
+    if r_message.tool_calls:
+        for tool_call in r_message.tool_calls:
+            func_args = json.loads(tool_call.function.arguments or "{}")
+            print(f"Calling function: {tool_call.function.name}({func_args})")
+    else:
+        print(response.choices[0].message.content)
 
 
 
