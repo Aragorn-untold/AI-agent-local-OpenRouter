@@ -13,7 +13,8 @@ def write_file(working_directory: str, file_path: str, content: str) -> str:
         if os.path.commonpath([work_dir, target_dir]) != work_dir:
             return f"Error: Cannot write to \"{file_path}\" as it is outside the permitted working directory"
         
-        os.makedirs(file_path, exist_ok=True)
+        path_no_file = os.path.dirname(path_to_file) # A path without file at the end (only dirs)
+        os.makedirs(path_no_file, exist_ok=True) # Creates directory if the final path is missing it
 
         with open(path_to_file, mode="w") as file:
             file.write(content)

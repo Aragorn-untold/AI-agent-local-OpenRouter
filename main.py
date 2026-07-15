@@ -4,7 +4,7 @@ import json
 from dotenv import load_dotenv
 from openai import OpenAI
 from prompts import system_prompt
-from AI_agent.call_function import available_functions
+from call_function import available_functions, call_function
 
 
 parser = argparse.ArgumentParser(
@@ -49,6 +49,14 @@ def main():
         for tool_call in r_message.tool_calls:
             func_args = json.loads(tool_call.function.arguments or "{}")
             print(f"Calling function: {tool_call.function.name}({func_args})")
+            
+            result_message = call_function(tool_call)
+            if not result_message["content"]:
+                raise Exception("No content")
+            if args.verbose:
+                print(f"-> {result_message['content']}")
+            else:
+                print(f"{result_message['content']}")
     else:
         print(response.choices[0].message.content)
 
